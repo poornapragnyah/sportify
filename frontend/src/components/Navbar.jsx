@@ -1,35 +1,50 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import '../styles/Navbar.css'; // Adjust path based on your file structure
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function Navbar() {
-  const user = JSON.parse(sessionStorage.getItem('user'));
   const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('token');
 
-  const logout = () => {
-    sessionStorage.removeItem('user');
-    navigate('/');
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <Link to="/">Home</Link>
-        <Link to="/venues">Venues</Link>
-        {user && <Link to="/bookings">My Bookings</Link>}
-      </div>
-      <div className="navbar-right">
-        {user ? (
-          <>
-            <span>Welcome, {user.username}</span>
-            <button onClick={logout} className="logout-btn">Logout</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        )}
+    <nav className="bg-white shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <span className="text-xl font-bold text-blue-600">Sportify</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300"
+                >
+                  Register
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </nav>
   );
