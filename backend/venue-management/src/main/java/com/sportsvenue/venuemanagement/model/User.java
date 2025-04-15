@@ -31,14 +31,13 @@ public class User {
 
     @NotBlank(message = "Role is required")
     @Column(nullable = false)
-    private String role; // USER, ADMIN, VENUE_MANAGER, COACH, PLAYER
+    private String role; // PLAYER, ADMIN, VENUE_MANAGER, COACH
 
     public enum Role {
-        USER("USER"),
+        PLAYER("PLAYER"),
         ADMIN("ADMIN"),
         VENUE_MANAGER("VENUE_MANAGER"),
-        COACH("COACH"),
-        PLAYER("PLAYER");
+        COACH("COACH");
 
         private final String value;
 
