@@ -151,7 +151,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Booking updateBookingStatus(Long id, String status) {
         Booking booking = getBookingById(id);
-        booking.setStatus(status);
+        booking.setStatus(BookingStatus.valueOf(status.toUpperCase()));
         return bookingRepository.save(booking);
     }
 

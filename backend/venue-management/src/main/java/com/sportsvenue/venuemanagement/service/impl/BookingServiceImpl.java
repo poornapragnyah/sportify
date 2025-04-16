@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
                                Double totalAmount) {
         // Check if the court is available
         if (!isCourtAvailable(venueId, bookingDate, startTime, endTime, courtNumber)) {
-            throw new IllegalStateException("The selected court is not available for the specified time slot");
+            throw new IllegalStateException("Court is not available for the selected time slot");
         }
 
         User user = userRepository.findById(userId)
@@ -64,24 +64,28 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking updateBookingStatus(Long bookingId, BookingStatus status) {
-        Booking booking = getBookingById(bookingId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         booking.setStatus(status);
         return bookingRepository.save(booking);
     }
 
     @Override
     public void cancelBooking(Long bookingId) {
-        Booking booking = getBookingById(bookingId);
-        if (booking.getStatus() == BookingStatus.COMPLETED) {
-            throw new IllegalStateException("Cannot cancel a completed booking");
-        }
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
     }
 
     @Override
     public List<Booking> getUserBookings(Long userId) {
-        return bookingRepository.findByUserId(userId);
+        return bookingRepository.findByUserIdWithDetails(userId);
+    }
+
+    @Override
+    public List<Booking> getUserBookingsByUsername(String username) {
+        return bookingRepository.findByUserUsername(username);
     }
 
     @Override
@@ -92,11 +96,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public boolean isCourtAvailable(Long venueId, LocalDate date, LocalTime startTime,
                                   LocalTime endTime, Integer courtNumber) {
-        List<Booking> conflictingBookings = bookingRepository.findConflictingBookings(venueId, date, courtNumber);
-        
-        return conflictingBookings.stream().noneMatch(booking ->
-            (startTime.isBefore(booking.getEndTime()) && endTime.isAfter(booking.getStartTime()))
-        );
+        List<Booking> conflictingBookings = bookingRepository.findConflictingBookings(
+                venueId, date, startTime, endTime, courtNumber);
+        return conflictingBookings.isEmpty();
     }
 
     @Override
@@ -107,7 +109,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void updatePaymentInfo(Long bookingId, String paymentId) {
-        Booking booking = getBookingById(bookingId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         booking.setPaymentId(paymentId);
         booking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(booking);

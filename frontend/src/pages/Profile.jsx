@@ -21,17 +21,21 @@ export default function Profile() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const [userResponse, bookingsResponse] = await Promise.all([
-          api.get(`/users/${username}`),
-          api.get(`/bookings/user/${username}`)
-        ]);
-        setUser(userResponse.data);
-        setEditedUser(userResponse.data);
-        setBookings(bookingsResponse.data);
+        // First get the user data
+        const userResponse = await api.get(`/users/${username}`);
+        const userData = userResponse.data;
+        setUser(userData);
+        setEditedUser(userData);
+
+        // Then get their bookings using the user ID
+        const bookingsResponse = await api.get(`/bookings/user/${userData.id}`);
+        setBookings(bookingsResponse.data || []);
       } catch (error) {
         console.error('Error fetching user data:', error);
         toast.error('Failed to load profile data');
-        navigate('/');
+        if (error.response?.status === 404) {
+          navigate('/');
+        }
       } finally {
         setLoading(false);
       }

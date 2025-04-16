@@ -21,15 +21,28 @@ function App() {
           <Navbar />
           <ToastContainer />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/profile/:username" element={<Profile />} />
             <Route path="/venues" element={<Venues />} />
             
+            {/* User Routes */}
+            <Route path="/profile/:username" element={<Profile />} />
+
             {/* Dashboard Routes */}
-            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
-            <Route path="/admin/venues" element={<DashboardLayout><VenueManagement /></DashboardLayout>} />
+            <Route path="/dashboard" element={
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            } />
+
+            {/* Admin Routes */}
+            <Route path="/admin/venues" element={
+              <DashboardLayout>
+                <VenueManagement />
+              </DashboardLayout>
+            } />
           </Routes>
         </div>
       </Router>
