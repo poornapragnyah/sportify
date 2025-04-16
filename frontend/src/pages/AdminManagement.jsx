@@ -109,10 +109,6 @@ export default function AdminManagement() {
     { title: 'User Management', path: '/admin/users', icon: '👥' },
     { title: 'Venue Management', path: '/admin/venues', icon: '🏟️' },
     { title: 'Booking Management', path: '/admin/bookings', icon: '📅' },
-    { title: 'Content Management', path: '/admin/content', icon: '📝' },
-    { title: 'Financial Management', path: '/admin/finance', icon: '💰' },
-    { title: 'System Settings', path: '/admin/settings', icon: '⚙️' },
-    { title: 'Support Management', path: '/admin/support', icon: '🛟' }
   ];
 
   return (

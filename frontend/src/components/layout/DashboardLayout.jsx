@@ -23,7 +23,6 @@ const DashboardLayout = ({ children }) => {
       { title: 'User Management', path: '/admin/users', icon: '👥' },
       { title: 'Venue Management', path: '/admin/venues', icon: '🏟️' },
       { title: 'Booking Management', path: '/admin/bookings', icon: '📅' },
-      { title: 'Support Tickets', path: '/admin/support', icon: '🛟' },
     ];
 
     const venueManagerItems = [
@@ -90,7 +89,7 @@ const DashboardLayout = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className={`md:ml-64 ${isSidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-200`}>
+      <div className={`${isSidebarOpen ? 'ml-64' : 'ml-0'} md:ml-64 transition-all duration-200`}>
         <div className="sticky top-0 z-10 flex items-center justify-between h-16 px-4 bg-white shadow">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}

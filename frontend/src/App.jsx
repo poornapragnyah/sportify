@@ -43,6 +43,18 @@ function App() {
                 <VenueManagement />
               </DashboardLayout>
             } />
+            {/* <Route path="/admin/bookings" element={
+              <DashboardLayout>
+                <BookingManagement />
+              </DashboardLayout>
+            } /> */}
+            {/* <Route path="/admin/users" element={
+              <DashboardLayout>
+                <UserManagement />
+              </DashboardLayout>
+            } /> */}
+
+
           </Routes>
         </div>
       </Router>
