@@ -6,6 +6,7 @@ import com.sportsvenue.venuemanagement.dto.LoginRequest;
 import com.sportsvenue.venuemanagement.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -141,24 +142,33 @@ public class UserService {
     @Transactional
     public ResponseEntity<?> login(LoginRequest loginRequest) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-                )
-            );
+            // First check if user exists
+            if (!userRepository.findByUsername(loginRequest.getUsername()).isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Invalid username or password"));
+            }
 
-            User user = getUserByUsername(loginRequest.getUsername());
-            String token = jwtUtil.generateToken(user.getUsername());
+            try {
+                Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword()
+                    )
+                );
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("username", user.getUsername());
-            response.put("role", user.getRole());
+                User user = getUserByUsername(loginRequest.getUsername());
+                String token = jwtUtil.generateToken(user.getUsername());
 
-            return ResponseEntity.ok(response);
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("username", user.getUsername());
+                response.put("role", user.getRole());
+
+                return ResponseEntity.ok(response);
+            } catch (BadCredentialsException e) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Invalid username or password"));
+            }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid username or password");
+            return ResponseEntity.internalServerError().body(Map.of("message", "An error occurred during login"));
         }
     }
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from '../context/AuthContext';
 
@@ -52,15 +52,11 @@ export default function Login() {
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data;
-      if (errorMessage) {
-        if (errorMessage.toLowerCase().includes('username') || errorMessage.toLowerCase().includes('password')) {
-          setErrors({ general: 'Invalid username or password' });
-        } else {
-          toast.error(errorMessage);
-        }
+      const errorMessage = error.response?.data?.message || error.response?.data || 'Failed to login. Please try again later.';
+      if (typeof errorMessage === 'string' && (errorMessage.toLowerCase().includes('username') || errorMessage.toLowerCase().includes('password'))) {
+        setErrors({ general: 'Invalid username or password' });
       } else {
-        toast.error('Failed to login. Please try again later.');
+        toast.error(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -108,7 +104,6 @@ export default function Login() {
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account? <a href="/register" className="text-blue-500 hover:underline">Register here</a>
         </p>
-        <ToastContainer position="bottom-right" />
       </div>
     </div>
   );

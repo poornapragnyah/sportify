@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,32 +15,38 @@ export default function AdminManagement() {
   const [errors, setErrors] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
-  const { isLoggedIn, userRole, checkAuth } = useAuth();
+  const { isLoggedIn, userRole, isLoading } = useAuth();
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      try {
-        if (!isLoggedIn) {
-          navigate('/login');
-          return;
-        }
-
-        if (userRole !== 'ADMIN') {
-          toast.error('Access denied. Admin privileges required.');
-          navigate('/');
-          return;
-        }
-
-        setIsAdmin(true);
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        toast.error('Error verifying admin status');
-        navigate('/login');
+      if (isLoading) {
+        return;
       }
+
+      if (!isLoggedIn) {
+        navigate('/login');
+        return;
+      }
+
+      if (userRole !== 'ADMIN') {
+        toast.error('Access denied. Admin privileges required.');
+        navigate('/');
+        return;
+      }
+
+      setIsAdmin(true);
     };
 
     checkAdminStatus();
-  }, [navigate, isLoggedIn, userRole]);
+  }, [navigate, isLoggedIn, userRole, isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -110,9 +116,12 @@ export default function AdminManagement() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-blue-600 mb-8">Admin Management Panel</h1>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-600">Admin Management</h1>
+          <p className="mt-2 text-gray-600">Manage your sports venue system</p>
+        </div>
         
         {/* Management Sections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -178,7 +187,6 @@ export default function AdminManagement() {
           </form>
         </div>
       </div>
-      <ToastContainer position="bottom-right" />
     </div>
   );
 } 

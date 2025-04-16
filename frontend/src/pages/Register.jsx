@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
   const [form, setForm] = useState({ 
@@ -162,7 +163,6 @@ export default function Register() {
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account? <a href="/login" className="text-blue-500 hover:underline">Login here</a>
         </p>
-        <ToastContainer position="bottom-right" />
       </div>
     </div>
   );

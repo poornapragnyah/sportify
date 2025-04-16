@@ -1,29 +1,55 @@
 package com.sportsvenue.venuemanagement.controller;
 
 import com.sportsvenue.venuemanagement.model.Venue;
-import com.sportsvenue.venuemanagement.repository.VenueRepository;
+import com.sportsvenue.venuemanagement.service.VenueService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
 
 import java.util.List;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/venues")
-public class VenueController {
+public class VenueController extends BaseController {
 
     @Autowired
-    private VenueRepository venueRepository;
+    private VenueService venueService;
 
     @GetMapping
-    public List<Venue> getAllVenues() {
-        return venueRepository.findAll();
+    public ResponseEntity<List<Venue>> getAllVenues() {
+        return success(venueService.getAllVenues());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Venue> getVenueById(@PathVariable Long id) {
+        return success(venueService.getVenueById(id));
     }
 
     @PostMapping
-    public Venue addVenue(@RequestBody Venue venue) {
-        return venueRepository.save(venue);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Venue> createVenue(@RequestBody Venue venue) {
+        return success(venueService.createVenue(venue));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Venue> updateVenue(@PathVariable Long id, @RequestBody Venue venue) {
+        return success(venueService.updateVenue(id, venue));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteVenue(@PathVariable Long id) {
+        venueService.deleteVenue(id);
+        return success(null);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Venue>> searchVenues(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String sportType) {
+        return success(venueService.searchVenues(name, location, sportType));
     }
 }
