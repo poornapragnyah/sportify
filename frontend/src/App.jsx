@@ -9,12 +9,13 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import AdminManagement from './pages/AdminManagement';
 import Venues from './pages/Venues';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true }}>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <ToastContainer />
@@ -24,6 +25,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile/:username" element={<Profile />} />
             <Route path="/admin" element={<AdminManagement />} />
+            <Route path="/admin/analytics" element={<AnalyticsDashboard />} />
             <Route path="/venues" element={<Venues />} />
           </Routes>
         </div>

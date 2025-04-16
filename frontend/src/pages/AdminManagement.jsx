@@ -3,6 +3,7 @@ import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../context/AuthContext';
 
 export default function AdminManagement() {
   const [form, setForm] = useState({ 
@@ -14,24 +15,23 @@ export default function AdminManagement() {
   const [errors, setErrors] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+  const { isLoggedIn, userRole, checkAuth } = useAuth();
 
   useEffect(() => {
-    // Check if user is admin
     const checkAdminStatus = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!isLoggedIn) {
           navigate('/login');
           return;
         }
 
-        const response = await api.get('/api/users/me');
-        if (response.data.role !== 'ADMIN') {
+        if (userRole !== 'ADMIN') {
           toast.error('Access denied. Admin privileges required.');
           navigate('/');
-        } else {
-          setIsAdmin(true);
+          return;
         }
+
+        setIsAdmin(true);
       } catch (error) {
         console.error('Error checking admin status:', error);
         toast.error('Error verifying admin status');
@@ -40,7 +40,7 @@ export default function AdminManagement() {
     };
 
     checkAdminStatus();
-  }, [navigate]);
+  }, [navigate, isLoggedIn, userRole]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -70,7 +70,7 @@ export default function AdminManagement() {
 
     setLoading(true);
     try {
-      const res = await api.post('/api/users/register/admin', form);
+      const res = await api.post('/users/register/admin', form);
       toast.success('New admin user created successfully!');
       setForm({ username: '', email: '', password: '' });
       console.log("Admin creation successful:", res.data);
@@ -98,57 +98,87 @@ export default function AdminManagement() {
     return null;
   }
 
+  const managementSections = [
+    { title: 'Analytics Dashboard', path: '/admin/analytics', icon: '📊' },
+    { title: 'User Management', path: '/admin/users', icon: '👥' },
+    { title: 'Venue Management', path: '/admin/venues', icon: '🏟️' },
+    { title: 'Booking Management', path: '/admin/bookings', icon: '📅' },
+    { title: 'Content Management', path: '/admin/content', icon: '📝' },
+    { title: 'Financial Management', path: '/admin/finance', icon: '💰' },
+    { title: 'System Settings', path: '/admin/settings', icon: '⚙️' },
+    { title: 'Support Management', path: '/admin/support', icon: '🛟' }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-2xl p-8">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">Create New Admin User</h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label htmlFor="username" className="block mb-1 text-sm font-medium text-gray-700">Username</label>
-            <input
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              placeholder="Enter username"
-              className={`w-full border ${errors.username ? 'border-red-500' : 'border-gray-300'} p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
-            />
-            {errors.username && <p className="mt-1 text-sm text-red-500">{errors.username}</p>}
-          </div>
-          <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-          </div>
-          <div>
-            <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              className={`w-full border ${errors.password ? 'border-red-500' : 'border-gray-300'} p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
-            />
-            {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded font-medium transition duration-300 disabled:opacity-50"
-          >
-            {loading ? "Creating Admin..." : "Create Admin User"}
-          </button>
-        </form>
-        <ToastContainer position="bottom-right" />
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-center text-blue-600 mb-8">Admin Management Panel</h1>
+        
+        {/* Management Sections Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {managementSections.map((section) => (
+            <button
+              key={section.path}
+              onClick={() => navigate(section.path)}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col items-center justify-center"
+            >
+              <span className="text-4xl mb-4">{section.icon}</span>
+              <h2 className="text-xl font-semibold text-gray-800">{section.title}</h2>
+            </button>
+          ))}
+        </div>
+
+        {/* Create New Admin Section */}
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-2xl p-8">
+          <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">Create New Admin User</h2>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="username" className="block mb-1 text-sm font-medium text-gray-700">Username</label>
+              <input
+                type="text"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                placeholder="Enter username"
+                className={`w-full border ${errors.username ? 'border-red-500' : 'border-gray-300'} p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
+              />
+              {errors.username && <p className="mt-1 text-sm text-red-500">{errors.username}</p>}
+            </div>
+            <div>
+              <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Enter email"
+                className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
+              />
+              {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+            </div>
+            <div>
+              <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Enter password"
+                className={`w-full border ${errors.password ? 'border-red-500' : 'border-gray-300'} p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
+              />
+              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded font-medium transition duration-300 disabled:opacity-50"
+            >
+              {loading ? "Creating Admin..." : "Create Admin User"}
+            </button>
+          </form>
+        </div>
       </div>
+      <ToastContainer position="bottom-right" />
     </div>
   );
 } 
