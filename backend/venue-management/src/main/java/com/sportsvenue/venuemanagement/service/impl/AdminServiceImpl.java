@@ -232,9 +232,10 @@ public class AdminServiceImpl implements AdminService {
         if (bookings.isEmpty()) return 0;
         
         return bookings.stream()
-                .mapToLong(booking -> booking.getEndTime().getTime() - booking.getStartTime().getTime())
+                .mapToLong(booking -> 
+                    java.time.Duration.between(booking.getStartTime(), booking.getEndTime()).toHours())
                 .average()
-                .orElse(0) / (1000 * 60 * 60); // Convert to hours
+                .orElse(0);
     }
 
     private Map<String, Double> calculateRevenueByMonth() {

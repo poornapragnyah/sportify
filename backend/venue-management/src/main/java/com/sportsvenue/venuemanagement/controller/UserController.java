@@ -3,6 +3,7 @@ package com.sportsvenue.venuemanagement.controller;
 import com.sportsvenue.venuemanagement.model.User;
 import com.sportsvenue.venuemanagement.service.UserService;
 import com.sportsvenue.venuemanagement.dto.LoginRequest;
+import com.sportsvenue.venuemanagement.dto.PasswordChangeRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -57,6 +58,28 @@ public class UserController extends BaseController {
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #username == authentication.name")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+        try {
+            User updatedUser = userService.updateUser(id, user);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/password")
+    @PreAuthorize("hasRole('ADMIN') or #username == authentication.name")
+    public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody PasswordChangeRequest request) {
+        try {
+            userService.changePassword(id, request.getCurrentPassword(), request.getNewPassword());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

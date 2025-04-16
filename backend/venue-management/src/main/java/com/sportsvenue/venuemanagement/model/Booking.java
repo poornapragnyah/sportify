@@ -15,6 +15,8 @@ public class Booking {
     private Long id;
 
     private LocalDateTime bookingDate;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String status; // PENDING, APPROVED, CANCELLED
 
     @ManyToOne

@@ -9,6 +9,8 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Venues from './pages/Venues';
 import Dashboard from './pages/Dashboard';
+import DashboardLayout from './components/layout/DashboardLayout';
+import VenueManagement from './components/dashboard/VenueManagement';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -24,7 +26,10 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile/:username" element={<Profile />} />
             <Route path="/venues" element={<Venues />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Dashboard Routes */}
+            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+            <Route path="/admin/venues" element={<DashboardLayout><VenueManagement /></DashboardLayout>} />
           </Routes>
         </div>
       </Router>

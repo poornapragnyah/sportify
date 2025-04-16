@@ -33,6 +33,8 @@ public class User {
     @Column(nullable = false)
     private String role; // PLAYER, ADMIN, VENUE_MANAGER, COACH
 
+    private boolean enabled = true;
+
     public enum Role {
         PLAYER("PLAYER"),
         ADMIN("ADMIN"),

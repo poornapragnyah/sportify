@@ -172,6 +172,27 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void changePassword(Long id, String currentPassword, String newPassword) {
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+            // Verify current password
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                throw new RuntimeException("Current password is incorrect");
+            }
+
+            // Update password
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error changing password: " + e.getMessage());
+        }
+    }
+
     private void validateRole(String role) {
         try {
             User.Role.valueOf(role.toUpperCase());
