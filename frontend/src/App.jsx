@@ -7,9 +7,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
-import AdminManagement from './pages/AdminManagement';
 import Venues from './pages/Venues';
-import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -24,9 +23,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile/:username" element={<Profile />} />
-            <Route path="/admin" element={<AdminManagement />} />
-            <Route path="/admin/analytics" element={<AnalyticsDashboard />} />
             <Route path="/venues" element={<Venues />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </div>
       </Router>

@@ -1,19 +1,15 @@
 package com.sportsvenue.venuemanagement.service.impl;
 
-import com.sportsvenue.venuemanagement.model.User;
-import com.sportsvenue.venuemanagement.model.Payment;
-import com.sportsvenue.venuemanagement.repository.UserRepository;
-import com.sportsvenue.venuemanagement.repository.VenueRepository;
-import com.sportsvenue.venuemanagement.repository.BookingRepository;
-import com.sportsvenue.venuemanagement.repository.PaymentRepository;
+import com.sportsvenue.venuemanagement.model.*;
+import com.sportsvenue.venuemanagement.repository.*;
 import com.sportsvenue.venuemanagement.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -30,6 +26,13 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private SupportTicketRepository supportTicketRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // User Management
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -42,7 +45,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @Transactional
     public User updateUserRole(Long id, String role) {
         User user = getUserById(id);
         user.setRole(role);
@@ -50,69 +52,196 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
+    public User createAdminUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("ADMIN");
+        return userRepository.save(user);
+    }
+
+    // Analytics
+    @Override
     public Map<String, Object> getUserAnalytics() {
         Map<String, Object> analytics = new HashMap<>();
-        
-        // Get total users
-        long totalUsers = userRepository.count();
-        analytics.put("totalUsers", totalUsers);
-        
-        // Get users by role
-        Map<String, Long> usersByRole = new HashMap<>();
-        for (User.Role role : User.Role.values()) {
-            usersByRole.put(role.getValue(), userRepository.countByRole(role.getValue()));
-        }
-        analytics.put("usersByRole", usersByRole);
-        
+        analytics.put("totalUsers", userRepository.count());
+        analytics.put("activeUsers", userRepository.countByEnabled(true));
+        analytics.put("userRoles", userRepository.findAll().stream()
+                .collect(Collectors.groupingBy(User::getRole, Collectors.counting())));
         return analytics;
     }
 
     @Override
     public Map<String, Object> getVenueAnalytics() {
         Map<String, Object> analytics = new HashMap<>();
-        
-        try {
-            System.out.println("Starting venue analytics calculation...");
-            
-            // Get total venues
-            long totalVenues = venueRepository.count();
-            System.out.println("Total venues found: " + totalVenues);
-            analytics.put("totalVenues", totalVenues);
-            
-            // Get total bookings
-            long totalBookings = bookingRepository.count();
-            System.out.println("Total bookings found: " + totalBookings);
-            analytics.put("totalBookings", totalBookings);
-            
-            // Calculate total revenue from payments
-            System.out.println("Fetching all payments...");
-            List<Payment> payments = paymentRepository.findAll();
-            System.out.println("Number of payments found: " + payments.size());
-            
-            double totalRevenue = payments.stream()
-                    .mapToDouble(Payment::getAmount)
-                    .sum();
-            System.out.println("Total revenue calculated: " + totalRevenue);
-            analytics.put("totalRevenue", totalRevenue);
-            
-            System.out.println("Analytics calculation completed successfully");
-        } catch (Exception e) {
-            System.err.println("Error in getVenueAnalytics: " + e.getMessage());
-            e.printStackTrace();
-            
-            // Initialize with default values in case of error
-            analytics.put("totalVenues", 0L);
-            analytics.put("totalBookings", 0L);
-            analytics.put("totalRevenue", 0.0);
-            throw new RuntimeException("Error calculating venue analytics: " + e.getMessage(), e);
-        }
-        
+        analytics.put("totalVenues", venueRepository.count());
+        analytics.put("totalBookings", bookingRepository.count());
+        analytics.put("totalRevenue", paymentRepository.findAll().stream()
+                .mapToDouble(Payment::getAmount)
+                .sum());
         return analytics;
+    }
+
+    @Override
+    public Map<String, Object> getBookingAnalytics() {
+        Map<String, Object> analytics = new HashMap<>();
+        analytics.put("totalBookings", bookingRepository.count());
+        analytics.put("bookingStatus", bookingRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Booking::getStatus, Collectors.counting())));
+        analytics.put("averageBookingDuration", calculateAverageBookingDuration());
+        return analytics;
+    }
+
+    @Override
+    public Map<String, Object> getFinancialAnalytics() {
+        Map<String, Object> analytics = new HashMap<>();
+        analytics.put("totalRevenue", paymentRepository.findAll().stream()
+                .mapToDouble(Payment::getAmount)
+                .sum());
+        analytics.put("paymentMethods", paymentRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Payment::getPaymentMethod, Collectors.counting())));
+        analytics.put("revenueByMonth", calculateRevenueByMonth());
+        return analytics;
+    }
+
+    // Venue Management
+    @Override
+    public List<Venue> getAllVenues() {
+        return venueRepository.findAll();
+    }
+
+    @Override
+    public Venue getVenueById(Long id) {
+        return venueRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Venue not found"));
+    }
+
+    @Override
+    public Venue createVenue(Venue venue) {
+        return venueRepository.save(venue);
+    }
+
+    @Override
+    public Venue updateVenue(Long id, Venue venue) {
+        Venue existingVenue = getVenueById(id);
+        venue.setId(id);
+        return venueRepository.save(venue);
+    }
+
+    @Override
+    public void deleteVenue(Long id) {
+        venueRepository.deleteById(id);
+    }
+
+    // Booking Management
+    @Override
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+
+    @Override
+    public Booking getBookingById(Long id) {
+        return bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+    }
+
+    @Override
+    public Booking updateBookingStatus(Long id, String status) {
+        Booking booking = getBookingById(id);
+        booking.setStatus(status);
+        return bookingRepository.save(booking);
+    }
+
+    @Override
+    public void deleteBooking(Long id) {
+        bookingRepository.deleteById(id);
+    }
+
+    // Financial Management
+    @Override
+    public List<Payment> getAllPayments() {
+        return paymentRepository.findAll();
+    }
+
+    @Override
+    public Payment getPaymentById(Long id) {
+        return paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+    }
+
+    @Override
+    public Map<String, Object> getRevenueReport(String startDate, String endDate) {
+        // Implementation for date range revenue report
+        return new HashMap<>();
+    }
+
+    @Override
+    public Map<String, Object> getPaymentAnalytics() {
+        Map<String, Object> analytics = new HashMap<>();
+        analytics.put("totalPayments", paymentRepository.count());
+        analytics.put("totalAmount", paymentRepository.findAll().stream()
+                .mapToDouble(Payment::getAmount)
+                .sum());
+        analytics.put("paymentStatus", paymentRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Payment::getStatus, Collectors.counting())));
+        return analytics;
+    }
+
+    // System Settings
+    @Override
+    public Map<String, Object> getSystemSettings() {
+        // Implementation for system settings
+        return new HashMap<>();
+    }
+
+    @Override
+    public void updateSystemSettings(Map<String, String> settings) {
+        // Implementation for updating system settings
+    }
+
+    // Support Management
+    @Override
+    public List<SupportTicket> getAllSupportTickets() {
+        return supportTicketRepository.findAll();
+    }
+
+    @Override
+    public SupportTicket getSupportTicketById(Long id) {
+        return supportTicketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Support ticket not found"));
+    }
+
+    @Override
+    public SupportTicket updateSupportTicketStatus(Long id, String status) {
+        SupportTicket ticket = getSupportTicketById(id);
+        ticket.setStatus(status);
+        return supportTicketRepository.save(ticket);
+    }
+
+    @Override
+    public void deleteSupportTicket(Long id) {
+        supportTicketRepository.deleteById(id);
+    }
+
+    // Helper methods
+    private double calculateAverageBookingDuration() {
+        List<Booking> bookings = bookingRepository.findAll();
+        if (bookings.isEmpty()) return 0;
+        
+        return bookings.stream()
+                .mapToLong(booking -> booking.getEndTime().getTime() - booking.getStartTime().getTime())
+                .average()
+                .orElse(0) / (1000 * 60 * 60); // Convert to hours
+    }
+
+    private Map<String, Double> calculateRevenueByMonth() {
+        return paymentRepository.findAll().stream()
+                .collect(Collectors.groupingBy(
+                    payment -> payment.getPaymentDate().getMonth().toString(),
+                    Collectors.summingDouble(Payment::getAmount)
+                ));
     }
 } 
