@@ -2,10 +2,18 @@ package com.sportsvenue.venuemanagement.service;
 
 import com.sportsvenue.venuemanagement.model.User;
 import com.sportsvenue.venuemanagement.repository.UserRepository;
+import com.sportsvenue.venuemanagement.dto.LoginRequest;
+import com.sportsvenue.venuemanagement.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +26,12 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
@@ -121,6 +135,30 @@ public class UserService {
             return userRepository.findByRole(role);
         } catch (Exception e) {
             throw new RuntimeException("Error finding users by role: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<?> login(LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getUsername(),
+                    loginRequest.getPassword()
+                )
+            );
+
+            User user = getUserByUsername(loginRequest.getUsername());
+            String token = jwtUtil.generateToken(user.getUsername());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("username", user.getUsername());
+            response.put("role", user.getRole());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid username or password");
         }
     }
 

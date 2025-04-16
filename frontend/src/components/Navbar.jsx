@@ -1,37 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../api/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await api.get('/api/users/me');
-          setIsLoggedIn(true);
-          setUserRole(response.data.role);
-        } catch (error) {
-          console.error('Error checking auth status:', error);
-          localStorage.removeItem('token');
-          setIsLoggedIn(false);
-          setUserRole(null);
-        }
-      }
-    };
-
-    checkAuth();
-  }, []);
+  const { isLoggedIn, userRole, username, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    setUserRole(null);
+    logout();
     toast.success('Logged out successfully!');
     navigate('/login');
   };
@@ -72,6 +49,12 @@ export default function Navbar() {
                     Admin Panel
                   </Link>
                 )}
+                <Link
+                  to={`/profile/${username}`}
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors duration-200"
+                >
+                  {username.charAt(0).toUpperCase()}
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium"
