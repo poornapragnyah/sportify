@@ -11,6 +11,9 @@ import Venues from './pages/Venues';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './components/layout/DashboardLayout';
 import VenueManagement from './components/dashboard/VenueManagement';
+import VenueManagerVenues from './components/dashboard/VenueManagerVenues';
+import AdminBookings from './components/dashboard/AdminBookings';
+import VenueManagerBookings from './components/dashboard/VenueManagerBookings';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -43,18 +46,28 @@ function App() {
                 <VenueManagement />
               </DashboardLayout>
             } />
-            {/* <Route path="/admin/bookings" element={
+            <Route path="/admin/bookings" element={
               <DashboardLayout>
-                <BookingManagement />
+                <AdminBookings />
               </DashboardLayout>
-            } /> */}
+            } />
             {/* <Route path="/admin/users" element={
               <DashboardLayout>
                 <UserManagement />
               </DashboardLayout>
             } /> */}
 
-
+            {/* Venue Manager Routes */}
+            <Route path="/manager/venues" element={
+              <DashboardLayout>
+                <VenueManagerVenues />
+              </DashboardLayout>
+            } />
+            <Route path="/manager/bookings" element={
+              <DashboardLayout>
+                <VenueManagerBookings />
+              </DashboardLayout>
+            } />
           </Routes>
         </div>
       </Router>

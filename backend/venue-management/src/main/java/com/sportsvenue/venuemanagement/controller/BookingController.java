@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -19,6 +20,26 @@ public class BookingController {
 
     @Autowired
     private BookingService bookingService;
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Booking>> getAllBookings() {
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+
+    @GetMapping("/admin/stats")
+    public ResponseEntity<Map<String, Object>> getAdminStats() {
+        return ResponseEntity.ok(bookingService.getAdminBookingStats());
+    }
+
+    @GetMapping("/manager/stats")
+    public ResponseEntity<Map<String, Object>> getManagerStats() {
+        return ResponseEntity.ok(bookingService.getManagerBookingStats());
+    }
+
+    @GetMapping("/manager/{managerId}")
+    public ResponseEntity<List<Booking>> getManagerBookings(@PathVariable Long managerId) {
+        return ResponseEntity.ok(bookingService.getManagerBookings(managerId));
+    }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Booking>> getUserBookings(@PathVariable Long userId) {
@@ -29,7 +50,6 @@ public class BookingController {
     public ResponseEntity<List<Booking>> getUserBookingsByUsername(@PathVariable String username) {
         return ResponseEntity.ok(bookingService.getUserBookingsByUsername(username));
     }
-
 
     @GetMapping("/venue/{venueId}")
     public ResponseEntity<List<Booking>> getVenueBookings(

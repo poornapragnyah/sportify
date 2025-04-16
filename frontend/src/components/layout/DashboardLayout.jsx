@@ -26,9 +26,9 @@ const DashboardLayout = ({ children }) => {
     ];
 
     const venueManagerItems = [
-      { title: 'My Venues', path: '/venue-manager/venues', icon: '🏟️' },
-      { title: 'Bookings', path: '/venue-manager/bookings', icon: '📅' },
-      { title: 'Analytics', path: '/venue-manager/analytics', icon: '📊' },
+      { title: 'My Venues', path: '/manager/venues', icon: '🏟️' },
+      { title: 'Bookings', path: '/manager/bookings', icon: '📅' },
+      { title: 'Analytics', path: '/manager/analytics', icon: '📊' },
     ];
 
     const playerItems = [
