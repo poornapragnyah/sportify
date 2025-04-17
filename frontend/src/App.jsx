@@ -22,7 +22,7 @@ function App() {
       <Router future={{ v7_startTransition: true }}>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
-          <ToastContainer />
+          <ToastContainer position="bottom-right" />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />

@@ -17,6 +17,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b JOIN FETCH b.user u JOIN FETCH b.venue v WHERE b.user.id = :userId")
     List<Booking> findByUserIdWithDetails(@Param("userId") Long userId);
 
+    @Query("SELECT b FROM Booking b JOIN FETCH b.user u JOIN FETCH b.venue v WHERE b.user.username = :username")
+    List<Booking> findByUserUsername(@Param("username") String username);
+
     List<Booking> findByVenueId(Long venueId);
     
     List<Booking> findByVenueIdAndBookingDate(Long venueId, LocalDate bookingDate);
@@ -31,4 +34,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         @Param("endTime") LocalTime endTime,
         @Param("courtNumber") Integer courtNumber
     );
+
+    @Query("SELECT b FROM Booking b JOIN FETCH b.venue v WHERE v.manager.id = :managerId")
+    List<Booking> findByVenueManagerId(@Param("managerId") Long managerId);
 }

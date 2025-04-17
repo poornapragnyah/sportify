@@ -27,9 +27,6 @@ public class AdminServiceImpl implements AdminService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private SupportTicketRepository supportTicketRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     // User Management
@@ -202,47 +199,13 @@ public class AdminServiceImpl implements AdminService {
         // Implementation for updating system settings
     }
 
-    // Support Management
-    @Override
-    public List<SupportTicket> getAllSupportTickets() {
-        return supportTicketRepository.findAll();
-    }
-
-    @Override
-    public SupportTicket getSupportTicketById(Long id) {
-        return supportTicketRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Support ticket not found"));
-    }
-
-    @Override
-    public SupportTicket updateSupportTicketStatus(Long id, String status) {
-        SupportTicket ticket = getSupportTicketById(id);
-        ticket.setStatus(status);
-        return supportTicketRepository.save(ticket);
-    }
-
-    @Override
-    public void deleteSupportTicket(Long id) {
-        supportTicketRepository.deleteById(id);
-    }
-
-    // Helper methods
     private double calculateAverageBookingDuration() {
-        List<Booking> bookings = bookingRepository.findAll();
-        if (bookings.isEmpty()) return 0;
-        
-        return bookings.stream()
-                .mapToLong(booking -> 
-                    java.time.Duration.between(booking.getStartTime(), booking.getEndTime()).toHours())
-                .average()
-                .orElse(0);
+        // Implementation for calculating average booking duration
+        return 0.0;
     }
 
     private Map<String, Double> calculateRevenueByMonth() {
-        return paymentRepository.findAll().stream()
-                .collect(Collectors.groupingBy(
-                    payment -> payment.getPaymentDate().getMonth().toString(),
-                    Collectors.summingDouble(Payment::getAmount)
-                ));
+        // Implementation for calculating revenue by month
+        return new HashMap<>();
     }
 } 

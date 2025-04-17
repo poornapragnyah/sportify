@@ -31,7 +31,6 @@ const AdminDashboard = () => {
     { title: 'Venue Management', path: '/admin/venues', icon: '🏟️', color: 'bg-green-500' },
     { title: 'Booking Management', path: '/admin/bookings', icon: '📅', color: 'bg-purple-500' },
     { title: 'User Management', path: '/admin/users', icon: '👥', color: 'bg-blue-500' },
-    { title: 'Support Tickets', path: '/admin/support', icon: '🛟', color: 'bg-yellow-500' }
   ];
 
   return (

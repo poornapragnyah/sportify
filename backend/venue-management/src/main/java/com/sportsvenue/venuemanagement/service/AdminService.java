@@ -40,10 +40,4 @@ public interface AdminService {
     // System Settings
     Map<String, Object> getSystemSettings();
     void updateSystemSettings(Map<String, String> settings);
-
-    // Support Management
-    List<SupportTicket> getAllSupportTickets();
-    SupportTicket getSupportTicketById(Long id);
-    SupportTicket updateSupportTicketStatus(Long id, String status);
-    void deleteSupportTicket(Long id);
 } 

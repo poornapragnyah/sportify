@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
+import { useAuth } from '../../context/AuthContext';
 
 const VenueManagerDashboard = () => {
+  const { user } = useAuth();
   const [analytics, setAnalytics] = useState({
     totalVenues: 0,
     activeBookings: 0,
@@ -16,8 +18,8 @@ const VenueManagerDashboard = () => {
     const fetchAnalytics = async () => {
       try {
         const [venueAnalytics, bookingAnalytics] = await Promise.all([
-          api.get('/api/venues/manager/analytics'),
-          api.get('/api/bookings/manager/analytics')
+          api.get('/venues/manager/analytics'),
+          api.get('/bookings/manager/stats')
         ]);
 
         setAnalytics({
@@ -33,8 +35,10 @@ const VenueManagerDashboard = () => {
       }
     };
 
-    fetchAnalytics();
-  }, []);
+    if (user) {
+      fetchAnalytics();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -98,7 +102,7 @@ const VenueManagerDashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-              <p className="text-2xl font-semibold text-gray-900">${analytics.totalRevenue.toFixed(2)}</p>
+              <p className="text-2xl font-semibold text-gray-900">₹{analytics.totalRevenue.toFixed(2)}</p>
             </div>
           </div>
         </div>

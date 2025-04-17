@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -32,6 +33,61 @@ public class BookingServiceImpl implements BookingService {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.venueRepository = venueRepository;
+    }
+
+    @Override
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+
+    @Override
+    public Map<String, Object> getAdminBookingStats() {
+        List<Booking> allBookings = bookingRepository.findAll();
+        
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalBookings", allBookings.size());
+        stats.put("activeBookings", allBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                .count());
+        stats.put("pendingBookings", allBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.PENDING)
+                .count());
+        stats.put("totalRevenue", allBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                .mapToDouble(Booking::getTotalAmount)
+                .sum());
+        
+        return stats;
+    }
+
+    @Override
+    public Map<String, Object> getManagerBookingStats() {
+        List<Booking> allBookings = bookingRepository.findAll();
+        
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalBookings", allBookings.size());
+        stats.put("activeBookings", allBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                .count());
+        stats.put("pendingBookings", allBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.PENDING)
+                .count());
+        stats.put("totalRevenue", allBookings.stream()
+                .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                .mapToDouble(Booking::getTotalAmount)
+                .sum());
+        
+        // Add venue-specific stats
+        Map<Long, Long> bookingsPerVenue = allBookings.stream()
+                .collect(Collectors.groupingBy(b -> b.getVenue().getId(), Collectors.counting()));
+        stats.put("bookingsPerVenue", bookingsPerVenue);
+        
+        return stats;
+    }
+
+    @Override
+    public List<Booking> getManagerBookings(Long managerId) {
+        return bookingRepository.findByVenueManagerId(managerId);
     }
 
     @Override

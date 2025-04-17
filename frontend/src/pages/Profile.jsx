@@ -27,8 +27,8 @@ export default function Profile() {
         setUser(userData);
         setEditedUser(userData);
 
-        // Then get their bookings using the user ID
-        const bookingsResponse = await api.get(`/bookings/user/${userData.id}`);
+        // Then get their bookings using the username
+        const bookingsResponse = await api.get(`/bookings/user/name/${username}`);
         setBookings(bookingsResponse.data || []);
       } catch (error) {
         console.error('Error fetching user data:', error);

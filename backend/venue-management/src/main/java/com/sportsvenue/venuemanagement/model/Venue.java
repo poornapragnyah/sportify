@@ -16,4 +16,14 @@ public class Venue {
     private String location;
     private int totalCourts;
     private String facilities;
+    private String description;
+    private String imageUrl;
+    private String sportType;
+    private double pricePerHour;
+    private String openingTime;
+    private String closingTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private User manager;
 }

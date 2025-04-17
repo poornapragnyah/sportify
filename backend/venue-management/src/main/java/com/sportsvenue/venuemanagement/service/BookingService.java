@@ -19,6 +19,8 @@ public interface BookingService {
     
     List<Booking> getUserBookings(Long userId);
     
+    List<Booking> getUserBookingsByUsername(String username);
+    
     List<Booking> getVenueBookings(Long venueId, LocalDate date);
     
     Booking createBooking(Long venueId, Long userId, LocalDate bookingDate,

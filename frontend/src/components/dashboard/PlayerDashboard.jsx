@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 
 const PlayerDashboard = () => {
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ const PlayerDashboard = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await api.get('/bookings/my-bookings');
+        const response = await api.get(`/bookings/user/id/${user.id}`);
         setBookings(response.data);
       } catch (error) {
         console.error('Error fetching bookings:', error);
@@ -21,8 +23,10 @@ const PlayerDashboard = () => {
       }
     };
 
-    fetchBookings();
-  }, []);
+    if (user) {
+      fetchBookings();
+    }
+  }, [user]);
 
   const quickActions = [
     { title: 'Find Venues', path: '/venues', icon: '🔍', color: 'bg-blue-500' },
@@ -64,11 +68,11 @@ const PlayerDashboard = () => {
             bookings.map((booking) => (
               <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <p className="font-medium">{booking.venueName}</p>
-                  <p className="text-sm text-gray-500">{new Date(booking.date).toLocaleDateString()}</p>
+                  <p className="font-medium">{booking.venue.name}</p>
+                  <p className="text-sm text-gray-500">{new Date(booking.bookingDate).toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">${booking.amount}</p>
+                  <p className="font-medium">₹{booking.totalAmount}</p>
                   <p className={`text-sm ${booking.status === 'CONFIRMED' ? 'text-green-500' : 'text-yellow-500'}`}>
                     {booking.status}
                   </p>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
+import { useAuth } from '../../context/AuthContext';
 
 const UserDashboard = () => {
+  const { user } = useAuth();
   const [analytics, setAnalytics] = useState({
     totalBookings: 0,
     activeBookings: 0,
@@ -16,8 +18,8 @@ const UserDashboard = () => {
     const fetchAnalytics = async () => {
       try {
         const [bookingAnalytics, userAnalytics] = await Promise.all([
-          api.get('/api/bookings/user/analytics'),
-          api.get('/api/users/me/analytics')
+          api.get(`/bookings/user/id/${user.id}/analytics`),
+          api.get('/users/me/analytics')
         ]);
 
         setAnalytics({
@@ -33,8 +35,10 @@ const UserDashboard = () => {
       }
     };
 
-    fetchAnalytics();
-  }, []);
+    if (user) {
+      fetchAnalytics();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -48,7 +52,7 @@ const UserDashboard = () => {
     { title: 'Book Venue', path: '/venues', icon: '🏟️', color: 'bg-blue-500' },
     { title: 'My Bookings', path: '/bookings', icon: '📅', color: 'bg-green-500' },
     { title: 'Favorites', path: '/favorites', icon: '❤️', color: 'bg-red-500' },
-    { title: 'Profile', path: '/profile', icon: '👤', color: 'bg-purple-500' }
+    { title: 'Profile', path: `/profile/${user?.username}`, icon: '👤', color: 'bg-purple-500' }
   ];
 
   return (
@@ -86,7 +90,7 @@ const UserDashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Spent</p>
-              <p className="text-2xl font-semibold text-gray-900">${analytics.totalSpent.toFixed(2)}</p>
+              <p className="text-2xl font-semibold text-gray-900">₹{analytics.totalSpent.toFixed(2)}</p>
             </div>
           </div>
         </div>

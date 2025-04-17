@@ -41,12 +41,12 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getManagerBookings(managerId));
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user/id/{userId}")
     public ResponseEntity<List<Booking>> getUserBookings(@PathVariable Long userId) {
         return ResponseEntity.ok(bookingService.getUserBookings(userId));
     }
 
-    @GetMapping("/user/{username}")
+    @GetMapping("/user/name/{username}")
     public ResponseEntity<List<Booking>> getUserBookingsByUsername(@PathVariable String username) {
         return ResponseEntity.ok(bookingService.getUserBookingsByUsername(username));
     }

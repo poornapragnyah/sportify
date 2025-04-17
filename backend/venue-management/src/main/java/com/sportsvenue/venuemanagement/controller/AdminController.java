@@ -63,11 +63,6 @@ public class AdminController extends BaseController {
         return success(adminService.getBookingAnalytics());
     }
 
-    @GetMapping("/analytics/financial")
-    public ResponseEntity<Map<String, Object>> getFinancialAnalytics() {
-        return success(adminService.getFinancialAnalytics());
-    }
-
     // Venue Management
     @GetMapping("/venues")
     public ResponseEntity<List<Venue>> getAllVenues() {
@@ -154,27 +149,4 @@ public class AdminController extends BaseController {
         return success(null);
     }
 
-    // Support Management
-    @GetMapping("/support/tickets")
-    public ResponseEntity<List<SupportTicket>> getAllSupportTickets() {
-        return success(adminService.getAllSupportTickets());
-    }
-
-    @GetMapping("/support/tickets/{id}")
-    public ResponseEntity<SupportTicket> getSupportTicketById(@PathVariable Long id) {
-        return success(adminService.getSupportTicketById(id));
-    }
-
-    @PutMapping("/support/tickets/{id}/status")
-    public ResponseEntity<SupportTicket> updateSupportTicketStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
-        return success(adminService.updateSupportTicketStatus(id, status));
-    }
-
-    @DeleteMapping("/support/tickets/{id}")
-    public ResponseEntity<Void> deleteSupportTicket(@PathVariable Long id) {
-        adminService.deleteSupportTicket(id);
-        return success(null);
-    }
 } 
