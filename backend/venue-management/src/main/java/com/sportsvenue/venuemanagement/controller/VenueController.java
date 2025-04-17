@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -27,19 +28,22 @@ public class VenueController extends BaseController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || hasRole('MANAGER')")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Venue> createVenue(@RequestBody Venue venue) {
         return success(venueService.createVenue(venue));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || hasRole('MANAGER')")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Venue> updateVenue(@PathVariable Long id, @RequestBody Venue venue) {
         return success(venueService.updateVenue(id, venue));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || hasRole('MANAGER')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteVenue(@PathVariable Long id) {
         venueService.deleteVenue(id);
         return success(null);

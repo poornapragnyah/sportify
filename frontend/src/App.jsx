@@ -10,7 +10,7 @@ import Profile from './pages/Profile';
 import Venues from './pages/Venues';
 import Dashboard from './pages/Dashboard';
 import DashboardLayout from './components/layout/DashboardLayout';
-import VenueManagement from './components/dashboard/VenueManagement';
+import AdminVenueManagement from './components/dashboard/AdminVenueManagement';
 import VenueManagerVenues from './components/dashboard/VenueManagerVenues';
 import AdminBookings from './components/dashboard/AdminBookings';
 import VenueManagerBookings from './components/dashboard/VenueManagerBookings';
@@ -43,7 +43,7 @@ function App() {
             {/* Admin Routes */}
             <Route path="/admin/venues" element={
               <DashboardLayout>
-                <VenueManagement />
+                <AdminVenueManagement />
               </DashboardLayout>
             } />
             <Route path="/admin/bookings" element={
